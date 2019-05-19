@@ -8,6 +8,10 @@ import { tipo_estagio, ICadastroEstagio } from '../../models/cadastro-estagio';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import moment from "moment";
+import 'react-times/css/material/default.css';
+// or you can use classic theme
+import 'react-times/css/classic/default.css';
+import TimePickerStyle from '../../components/TimePicker/TimePicker';
 
 
 export interface IFormProps extends DispatchProps {
@@ -115,13 +119,17 @@ export class Form extends React.Component<IFormProps, IFormState> {
 
     handleOnInitDateChange = (value, e) => {
         this.setState(prevState => ({
-            newCadastro: { ...prevState.newCadastro, dataInicioEstagio: value}}));
+            newCadastro: { ...prevState.newCadastro, dataInicioEstagio: value }
+        }));
     }
 
     handleOnEndDateChange = (value, e) => {
         this.setState(prevState => ({
-            newCadastro: { ...prevState.newCadastro, dataTerminoEstagio: value}}));
+            newCadastro: { ...prevState.newCadastro, dataTerminoEstagio: value }
+        }));
     }
+
+    
 
     render() {
         return (
@@ -431,6 +439,10 @@ export class Form extends React.Component<IFormProps, IFormState> {
                             </div>
                         </div>
 
+                        <TimePickerStyle
+                            day = "Segunda-Feira"
+                        />
+                        
                         <button
                             onClick={this.handleSave}>Enviar</button>
                     </div>

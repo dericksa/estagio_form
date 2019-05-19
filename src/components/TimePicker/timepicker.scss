@@ -1,0 +1,39 @@
+$shadow-key-umbra-opacity:      0.20 !default;
+$shadow-key-penumbra-opacity:   0.14 !default;
+$shadow-ambient-shadow-opacity: 0.12 !default;
+
+
+.time-picker-container {
+    max-width: 540px;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    box-shadow: 0 8px 10px 1px rgba(0, 0, 0, $shadow-key-penumbra-opacity),
+                0 3px 14px 2px rgba(0, 0, 0, $shadow-ambient-shadow-opacity),
+                0 5px 5px -3px rgba(0, 0, 0, $shadow-key-umbra-opacity);
+}
+
+.time-picker-header {
+    display: flex;
+
+}
+
+.time-picker-time-divisor-style {
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.react_times_button time_picker_preview {
+}
+
+.time_picker_container {
+
+    width:200px !important
+
+}
+
+.time-picker-day-style{
+    display: flex;
+
+}
