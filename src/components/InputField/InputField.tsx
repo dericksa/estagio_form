@@ -20,15 +20,14 @@ export interface IInputFieldProps {
   maskFormat?: string;
   onKeyPress?: (event) => void;
   onKeyDownPress?: (event) => void;
-  isCurrency?: boolean;
   isTextArea?: boolean;
-  readOnly?: boolean;
-  withoutLineBelow?: boolean;
+  hasInfo?: boolean;
+  info?: string;
 }
 
 export interface IInputFieldState {
   fieldActivated?: boolean;
-  lineBelowInputClassName?: string;
+  formBorderClassName?: string;
   validationIcon?: string;
   labelClassName?: string;
   userIsTyping?: boolean;
@@ -41,75 +40,30 @@ export class InputField extends React.Component<IInputFieldProps, IInputFieldSta
     super(props);
 
     this.state = {
-      lineBelowInputClassName: 'input-field-line-below-input-inactive-and-empty'
+      formBorderClassName: 'form-field'
     };
 
-    this.backLineBelowInputToNormal$ = _.debounce(this.backLineBelowInputToNormal, 500);
   }
 
   componentDidMount() {
-    this.mapLabelClassName(this.props.error, this.props.valid);
   }
 
   componentWillReceiveProps(newProps) {
-    this.mapLabelClassName(newProps.error, newProps.valid);
+
 
     if (!!newProps.error) {
       this.setState({
-        lineBelowInputClassName: classnames('input-field-line-below-input-inactive-and-empty', 'input-field-line-below-input-error'),
-        validationIcon: 'content/images/error-icon.png'
-      });
-    }
-
-    if (!!newProps.valid) {
-      this.setState({
-        lineBelowInputClassName: classnames('input-field-line-below-input-inactive-and-empty', 'input-field-line-below-input-success'),
-        validationIcon: 'content/images/valid-icon.png'
+        formBorderClassName: 'form-field-error'
       });
     }
   }
-
-  backLineBelowInputToNormal = () => {
-    this.setState({ lineBelowInputClassName: 'input-field-line-below-input-inactive-and-empty' });
-  };
 
   cleanIcon = () => {
     this.setState({ validationIcon: '' });
   };
 
-  mapLabelClassName = (error?: boolean, valid?: boolean) => {
-    if (!!error) {
-      this.setState({
-        labelClassName: classnames('label-without-error', 'label-with-error'),
-        lineBelowInputClassName: classnames('input-field-line-below-input-inactive-and-empty', 'input-field-line-below-input-error'),
-        validationIcon: 'content/images/error-icon.png'
-      });
-      return;
-    }
-
-    if (!!valid) {
-      this.setState({
-        labelClassName: classnames('label-without-error', 'label-with-success'),
-        lineBelowInputClassName: classnames('input-field-line-below-input-inactive-and-empty', 'input-field-line-below-input-success'),
-        validationIcon: 'content/images/valid-icon.png'
-      });
-      return;
-    }
-
-    this.setState({
-      labelClassName: classnames('label-without-error'),
-      lineBelowInputClassName: classnames('input-field-line-below-input-inactive-and-empty'),
-      validationIcon: ''
-    });
-  };
 
   componentWillUnmount() {}
-
-  mapClassName = () => {
-    const className = this.props.inputClassName ? classnames([this.props.inputClassName, 'input-field']) : classnames('input-field');
-
-    return className;
-  };
 
   activateField = () => {
     if (!this.props.onClick) {
@@ -125,33 +79,30 @@ export class InputField extends React.Component<IInputFieldProps, IInputFieldSta
 
   handleOnInput = (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     this.setState({
-      lineBelowInputClassName: classnames('input-field-line-below-input-inactive-and-empty', 'input-field-line-below-input-typing')
+      formBorderClassName: 'form-field'
     });
-    this.mapLabelClassName();
-    this.backLineBelowInputToNormal$();
-    this.cleanIcon();
   };
 
   render() {
     return (
       <div className={'input-field-container'}>
-        <label
-          className={
-            this.state.fieldActivated || this.props.value
-              ? classnames([this.state.labelClassName, 'transition'])
-              : this.state.labelClassName
-          }
-        >
-          {(this.state.fieldActivated || this.props.value) && this.props.title != null ? this.props.title : ''}
-        </label>
 
+        <div className={'input-info-header'}>
+          <label className="form-label">
+            {this.props.title != null ? this.props.title : ''}
+          </label>
+
+          {this.props.hasInfo &&
+          <label className="input-info-text-style">
+            {this.props.info != null ? this.props.info : ''}
+          </label>
+          }
+        </div>
         <div className={'input-field-wrapper'}>
           {this.props.isMaskRequired &&
-            !!!this.props.isTextArea &&
-            !!!this.props.isCurrency && (
+            !!!this.props.isTextArea &&(
               <InputMask
                 autoComplete={'off'}
-                readOnly={!!this.props.readOnly ? this.props.readOnly : false}
                 onKeyUp={this.handleOnInput}
                 onFocus={this.activateField}
                 onBlur={this.disableField}
@@ -160,14 +111,13 @@ export class InputField extends React.Component<IInputFieldProps, IInputFieldSta
                 placeholder={!this.state.fieldActivated && !!this.props.placeholder ? this.props.placeholder : ''}
                 mask={this.props.maskFormat}
                 onKeyPress={!!this.props.onKeyPress ? this.props.onKeyPress : () => void 0}
-                className={this.mapClassName()}
+                className={this.state.formBorderClassName}
                 onKeyDown={!!this.props.onKeyDownPress ? this.props.onKeyDownPress : () => void 0}
               />
             )}
 
           {!this.props.isMaskRequired &&
-            !!!this.props.isTextArea &&
-            !!!this.props.isCurrency && (
+            !!!this.props.isTextArea && (
               <input
                 autoComplete={'off'}
                 onKeyUp={this.handleOnInput}
@@ -175,11 +125,10 @@ export class InputField extends React.Component<IInputFieldProps, IInputFieldSta
                 onBlur={this.disableField}
                 maxLength={!!this.props.maxLength ? this.props.maxLength : 50}
                 type={!!this.props.type ? this.props.type : 'text'}
-                className={this.mapClassName()}
+                className= {this.state.formBorderClassName}
                 value={this.props.value ? this.props.value.toString() : ''}
                 onChange={!!this.props.onChange ? this.props.onChange : () => void 0}
                 placeholder={!this.state.fieldActivated && !!this.props.placeholder ? this.props.placeholder : ''}
-                readOnly={!!this.props.readOnly ? this.props.readOnly : false}
                 onClick={!!this.props.onClick ? this.props.onClick : () => void 0}
               />
             )}
@@ -192,16 +141,12 @@ export class InputField extends React.Component<IInputFieldProps, IInputFieldSta
               maxLength={!!this.props.maxLength ? this.props.maxLength : 50}
               onBlur={this.disableField}
               onChange={!!this.props.onChange ? this.props.onChange : () => void 0}
-              className={this.mapClassName()}
+              className={this.state.formBorderClassName}
               value={this.props.value ? this.props.value.toString() : ''}
-              readOnly={!!this.props.readOnly ? this.props.readOnly : false}
-              placeholder={!this.state.fieldActivated && !!this.props.placeholder ? this.props.placeholder : ''}
+              placeholder={!this.state.fieldActivated && !!this.props.placeholder ? translate(this.props.placeholder) : ''}
             />
           )}
 
-          <img src={this.state.validationIcon} className={'icon-img'} />
-
-          {!this.props.withoutLineBelow && <div className={this.state.lineBelowInputClassName} />}
         </div>
       </div>
     );
