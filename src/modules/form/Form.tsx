@@ -7,7 +7,7 @@ import GroupHeader from './groupheader/groupheader'
 import { tipo_estagio, ICadastroEstagio } from '../../models/cadastro-estagio';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import * as moment from "moment";
+import moment from "moment";
 
 
 export interface IFormProps extends DispatchProps {
@@ -80,7 +80,7 @@ export class Form extends React.Component<IFormProps, IFormState> {
         console.log(isNameError)
 
         this.setState({
-            errors: { ...this.state.errors, ['name']: isNameError },
+            errors: { ...this.state.errors, ['nome']: isNameError },
         });
 
 
@@ -113,8 +113,14 @@ export class Form extends React.Component<IFormProps, IFormState> {
         this.setState(prevState => ({ newCadastro: { ...prevState.newCadastro, tipoEstagio: tipo } }));
     }
 
-    handleOnInitDateChange = date => {
-        console.log()
+    handleOnInitDateChange = (value, e) => {
+        this.setState(prevState => ({
+            newCadastro: { ...prevState.newCadastro, dataInicioEstagio: value}}));
+    }
+
+    handleOnEndDateChange = (value, e) => {
+        this.setState(prevState => ({
+            newCadastro: { ...prevState.newCadastro, dataTerminoEstagio: value}}));
     }
 
     render() {
@@ -324,7 +330,7 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                     <DatePicker
                                         dateFormat="dd/MM/yyyy"
                                         selected={this.state.newCadastro.dataInicioEstagio}
-                                        onChange={this.handleOnInitDateChange} />
+                                        onChange={(value, e) => this.handleOnInitDateChange(value, e)} />
                                 </div>
                             </div>
 
@@ -334,7 +340,7 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                     <DatePicker
                                         dateFormat="dd/MM/yyyy"
                                         selected={this.state.newCadastro.dataTerminoEstagio}
-                                        onChange={this.handleOnInitDateChange} />
+                                        onChange={(value, e) => this.handleOnEndDateChange(value, e)} />
                                 </div>
                             </div>
 
