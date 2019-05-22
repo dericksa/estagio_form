@@ -23,6 +23,14 @@ $shadow-ambient-shadow-opacity: 0.12 !default;
     margin-left: 40px;
   }
 
+  .form-time-divisor {
+    display: flex;
+    flex-direction: column;
+    max-width: 320px;
+    margin-bottom: 25px;
+    margin-left: 40px;
+  }
+
   .form-input {
     max-height: 50px;
   }

@@ -26,9 +26,17 @@ export interface ICadastroEstagio {
 }
 
 export interface horario {
-    diaSemana?: string
+    diaSemana?: dia_semana
     horarioInicio?: string
     horarioFim?: string
+}
+
+export enum dia_semana {
+    SEGUNDA_FEIRA = 'Segunda-Feira',
+    TERCA_FEIRA = 'Terça-Feira',
+    QUARTA_FEIRA = 'Quarta-Feira',
+    QUINTA_FEIRA = 'Quinta-Feira',
+    SEXTA_FEIRA = 'Sexta-Feira',
 }
 
 export enum tipo_estagio {

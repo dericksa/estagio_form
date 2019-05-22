@@ -4,7 +4,7 @@ import InputField from '../../components/InputField/InputField';
 import Select from '../../components/Select/select';
 import Header from './header/header'
 import GroupHeader from './groupheader/groupheader'
-import { tipo_estagio, ICadastroEstagio } from '../../models/cadastro-estagio';
+import { dia_semana, tipo_estagio, ICadastroEstagio } from '../../models/cadastro-estagio';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import moment from "moment";
@@ -97,7 +97,7 @@ export class Form extends React.Component<IFormProps, IFormState> {
         }
     }
 
-    handleInput(e) {
+    handleInput = (e) => {
         var tipo = tipo_estagio.NOBG
         switch (e.target.value) {
             case tipo_estagio.NOBG:
@@ -129,7 +129,7 @@ export class Form extends React.Component<IFormProps, IFormState> {
         }));
     }
 
-    
+
 
     render() {
         return (
@@ -225,6 +225,70 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                 />
                             </div>
 
+                        </div>
+
+                        <div className={'form-group-container'}>
+                            <GroupHeader
+                                title='Horários de Aula'
+                            />
+
+                            <div className={'form-time-divisor'}>
+                                <TimePickerStyle
+                                    day={dia_semana.SEGUNDA_FEIRA}
+                                    maxSlots={17}
+                                    startHour='7:00'
+                                    endHour='23:00'
+                                    step={15}
+                                    unit='minute'
+                                />
+                            </div>
+
+                            <div className={'form-time-divisor'}>
+                                <TimePickerStyle
+                                    day={dia_semana.TERCA_FEIRA}
+                                    maxSlots={17}
+                                    startHour='6:00'
+                                    endHour='23:00'
+                                    step={15}
+                                    unit='minute'
+                                />
+                            </div>
+
+                            <div className={'form-time-divisor'}>
+                                <TimePickerStyle
+                                    day={dia_semana.QUARTA_FEIRA}
+                                    maxSlots={17}
+                                    startHour='6:00'
+                                    endHour='23:00'
+                                    step={15}
+                                    unit='minute'
+                                />
+                            </div>
+
+                            <div className={'form-time-divisor'}>
+                                <TimePickerStyle
+                                    day={dia_semana.QUINTA_FEIRA}
+                                    maxSlots={17}
+                                    startHour='6:00'
+                                    endHour='23:00'
+                                    step={15}
+                                    unit='minute'
+                                />
+                            </div>
+
+
+                            <div className={'form-time-divisor'}>
+                                <TimePickerStyle
+                                    day={dia_semana.SEXTA_FEIRA}
+                                    maxSlots={17}
+                                    startHour='6:00'
+                                    endHour='23:00'
+                                    step={15}
+                                    unit='minute'
+                                />
+                            </div>
+
+                            
                         </div>
 
                         <div className={'form-group-container'}>
@@ -439,10 +503,70 @@ export class Form extends React.Component<IFormProps, IFormState> {
                             </div>
                         </div>
 
-                        <TimePickerStyle
-                            day = "Segunda-Feira"
-                        />
-                        
+                        <div className={'form-group-container'}>
+                            <GroupHeader
+                                title='Horários de Estágio'
+                            />
+
+                            <div className={'form-time-divisor'}>
+                                <TimePickerStyle
+                                    day={dia_semana.SEGUNDA_FEIRA}
+                                    maxSlots={3}
+                                    startHour='6:00'
+                                    endHour='23:00'
+                                    step={15}
+                                    unit='minute'
+                                />
+                            </div>
+
+                            <div className={'form-time-divisor'}>
+                                <TimePickerStyle
+                                    day={dia_semana.TERCA_FEIRA}
+                                    maxSlots={3}
+                                    startHour='6:00'
+                                    endHour='23:00'
+                                    step={15}
+                                    unit='minute'
+                                />
+                            </div>
+
+                            <div className={'form-time-divisor'}>
+                                <TimePickerStyle
+                                    day={dia_semana.QUARTA_FEIRA}
+                                    maxSlots={3}
+                                    startHour='6:00'
+                                    endHour='23:00'
+                                    step={15}
+                                    unit='minute'
+                                />
+                            </div>
+
+                            <div className={'form-time-divisor'}>
+                                <TimePickerStyle
+                                    day={dia_semana.QUINTA_FEIRA}
+                                    maxSlots={3}
+                                    startHour='6:00'
+                                    endHour='23:00'
+                                    step={15}
+                                    unit='minute'
+                                />
+                            </div>
+
+
+                            <div className={'form-time-divisor'}>
+                                <TimePickerStyle
+                                    day={dia_semana.SEXTA_FEIRA}
+                                    maxSlots={3}
+                                    startHour='6:00'
+                                    endHour='23:00'
+                                    step={15}
+                                    unit='minute'
+                                />
+                            </div>
+
+                            
+                        </div>
+
                         <button
                             onClick={this.handleSave}>Enviar</button>
                     </div>
