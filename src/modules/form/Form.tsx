@@ -12,6 +12,7 @@ import 'react-times/css/material/default.css';
 // or you can use classic theme
 import 'react-times/css/classic/default.css';
 import TimePickerStyle from '../../components/TimePicker/TimePicker';
+import { MDBBtn } from "mdbreact";
 
 
 export interface IFormProps extends DispatchProps {
@@ -174,6 +175,8 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                     inputClassName={'form-input'}
                                     value={this.state.newCadastro.telefone ? this.state.newCadastro.telefone : ''}
                                     placeholder={'Telefone'}
+                                    isMaskRequired
+                                    maskFormat={'(99)9999-9999'}
                                 />
                             </div>
 
@@ -186,6 +189,8 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                     inputClassName={'form-input'}
                                     value={this.state.newCadastro.celular ? this.state.newCadastro.celular : ''}
                                     placeholder={'Celular'}
+                                    isMaskRequired
+                                    maskFormat={'(99)99999-9999'}
                                 />
                             </div>
 
@@ -210,6 +215,8 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                     inputClassName={'form-input'}
                                     value={this.state.newCadastro.ano ? this.state.newCadastro.ano : ''}
                                     placeholder={'Ano'}
+                                    isMaskRequired
+                                    maskFormat={'9'}
                                 />
                             </div>
 
@@ -222,6 +229,8 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                     inputClassName={'form-input'}
                                     value={this.state.newCadastro.periodo ? this.state.newCadastro.periodo : ''}
                                     placeholder={'Período'}
+                                    isMaskRequired
+                                    maskFormat={'9'}
                                 />
                             </div>
 
@@ -353,6 +362,8 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                     inputClassName={'form-input'}
                                     value={this.state.newCadastro.telefoneSupervisor ? this.state.newCadastro.telefoneSupervisor : ''}
                                     placeholder={'Telefone do Supervisor'}
+                                    isMaskRequired
+                                    maskFormat={'(99)9999-9999'}
                                 />
                             </div>
 
@@ -366,6 +377,8 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                     inputClassName={'form-input'}
                                     value={this.state.newCadastro.celularSupervisor ? this.state.newCadastro.celularSupervisor : ''}
                                     placeholder={'Celular do Supervisor'}
+                                    isMaskRequired
+                                    maskFormat={'(99)99999-9999'}
                                 />
                             </div>
 
@@ -461,6 +474,8 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                     inputClassName={'form-input'}
                                     value={this.state.newCadastro.telefoneOrientador ? this.state.newCadastro.telefoneOrientador : ''}
                                     placeholder={'Telefone do Orientador'}
+                                    isMaskRequired
+                                    maskFormat={'(99)9999-9999'}
                                 />
                             </div>
 
@@ -474,6 +489,8 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                     inputClassName={'form-input'}
                                     value={this.state.newCadastro.celularOrientador ? this.state.newCadastro.celularOrientador : ''}
                                     placeholder={'Celular do Orientador'}
+                                    isMaskRequired
+                                    maskFormat={'(99)99999-9999'}
                                 />
                             </div>
 
@@ -567,8 +584,10 @@ export class Form extends React.Component<IFormProps, IFormState> {
                             
                         </div>
 
-                        <button
-                            onClick={this.handleSave}>Enviar</button>
+                        <div className='form-send-button'>
+                        <MDBBtn rounded outline color="danger" onClick={this.handleSave}>Enviar</MDBBtn>
+                        </div>
+
                     </div>
                 </div>
             </div>

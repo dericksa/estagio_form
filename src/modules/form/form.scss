@@ -11,6 +11,12 @@ $shadow-ambient-shadow-opacity: 0.12 !default;
   margin-top: 118px;
 }
 
+.form-send-button {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
 .form-container {
     max-width: 529px;
   }
