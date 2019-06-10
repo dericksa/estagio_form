@@ -11,6 +11,13 @@ $shadow-ambient-shadow-opacity: 0.12 !default;
   margin-top: 118px;
 }
 
+.label-error-date {
+  font-size: 10px;
+  display: flex;
+  text-decoration: underline;
+  color: rgb(199, 23, 23);
+}
+
 .form-send-button {
   display: flex;
   justify-content: center;

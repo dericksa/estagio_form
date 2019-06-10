@@ -11,24 +11,30 @@ export interface ICadastroEstagio {
     supervisorEmpresa?: string,
     cargoSupervisor?: string,
     telefoneSupervisor?: string,
-    celularSupervisor?: string,
     emailSupervisor?: string,
     emailRH?: string,
     horarioEstagio?: horario[],
+    horarios?: horario[],
     dataInicioEstagio?: Date,
     dataTerminoEstagio?: Date,
     nomeOrientador?: string,
-    telefoneOrientador?: string,
-    celularOrientador?: string,
+    telefoneOrientador?: string
     emailOrientador?: string,
     cargoOrientador?: string,
     atividadesEstagio?: string,
+    observacoes?: string
 }
 
 export interface horario {
     diaSemana?: dia_semana
     horarioInicio?: string
     horarioFim?: string
+    tipo?: tipo_horario
+}
+
+export enum tipo_horario {
+    ESTAGIO = 'Estagio',
+    AULA = 'Aula'
 }
 
 export enum dia_semana {
@@ -37,11 +43,13 @@ export enum dia_semana {
     QUARTA_FEIRA = 'Quarta-Feira',
     QUINTA_FEIRA = 'Quinta-Feira',
     SEXTA_FEIRA = 'Sexta-Feira',
+    SABADO = 'Sábado'
 }
 
 export enum tipo_estagio {
     NOBG = 'NÃO OBRIGATÓRIO',
     OBG_1 = 'OBRIGATÓRIO 1',
     OBG_2 = 'OBRIGATÓRIO 2',
-    OBG_1_2 ='OBRIGATÓRIO 1 e 2'
+    OBG_1_2 ='OBRIGATÓRIO 1 e 2',
+    IC ='INICIAÇÃO CIENTIFICA'
 }

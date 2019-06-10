@@ -41,8 +41,9 @@ export class Select extends React.Component<ISelectProps, ISelectState> {
       });
     }
 
-    if (!!newProps.valid) {
+    if (!!newProps.error) {
       this.setState({
+        formBorderClassName: 'form-field'
       });
     }
   }

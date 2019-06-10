@@ -49,11 +49,14 @@ export class InputField extends React.Component<IInputFieldProps, IInputFieldSta
   }
 
   componentWillReceiveProps(newProps) {
-
-
     if (!!newProps.error) {
       this.setState({
         formBorderClassName: 'form-field-error'
+      });
+    }
+    if (!!!newProps.error) {
+      this.setState({
+        formBorderClassName: 'form-field'
       });
     }
   }
