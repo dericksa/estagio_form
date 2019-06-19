@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/estagio_form/precache-manifest.1511677dacea977df312cd94603c9d25.js"
+  "/estagio_form/precache-manifest.e6bfdba560848174ff6c6cfc2f72bf07.js"
 );
 
 self.addEventListener('message', (event) => {
