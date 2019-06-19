@@ -13,7 +13,6 @@ export interface ICadastroEstagio {
     telefoneSupervisor?: string,
     emailSupervisor?: string,
     emailRH?: string,
-    horarioEstagio?: horario[],
     horarios?: horario[],
     dataInicioEstagio?: Date,
     dataTerminoEstagio?: Date,
@@ -51,5 +50,5 @@ export enum tipo_estagio {
     OBG_1 = 'OBRIGATÓRIO 1',
     OBG_2 = 'OBRIGATÓRIO 2',
     OBG_1_2 ='OBRIGATÓRIO 1 e 2',
-    IC ='INICIAÇÃO CIENTIFICA'
+    IC ='INICIAÇÃO CIENTÍFICA'
 }

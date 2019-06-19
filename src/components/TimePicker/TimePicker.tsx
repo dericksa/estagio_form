@@ -2,7 +2,7 @@ import React, { ChangeEvent } from 'react';
 import { translate } from 'react-jhipster';
 import classnames from 'classnames';
 import InputMask from 'react-input-mask';
-import { dia_semana, horario} from '../../models/cadastro-estagio';
+import { dia_semana, horario, tipo_horario} from '../../models/cadastro-estagio';
 import _ from 'lodash';
 import TimePicker from 'react-times';
 import './timepicker.scss'
@@ -17,7 +17,7 @@ import { listenerCount } from 'cluster';
 
 /*
   Ideias:
-  Adicionar -> Maxnumber ++, se atingiu 3, desativa botão de adicionar
+  Adicionar -> Maxnumber ++, se atingiu 3, desativa botão de adicionar - done
   OnTimeChange (i (sendo o segundo (i*2)-1), caso seja o segundo e /maxNumber*2 == 0, validar todos)
   18:00-19:00 = Guardar em uma lista de strings concatenada
 
@@ -27,13 +27,14 @@ import { listenerCount } from 'cluster';
 
 export interface ITimePickerProps {
   day?: dia_semana;
+  time_type: tipo_horario;
   error?: boolean;
   maxSlots?: number;
   startHour?: string;
   endHour?: string;
   step?: number;
   unit?: string;
-  onChange?: (event: ChangeEvent<HTMLSelectElement>) => void;
+  onUpdateTime?: (day: dia_semana, listOfHours?: horario[]) => void;
 }
 
 export interface ITimePickerState {
@@ -48,7 +49,7 @@ export class TimePickerStyle extends React.Component<ITimePickerProps, ITimePick
     super(props);
 
     this.state = {
-      formBorderClassName: 'form-field',
+      formBorderClassName: 'time-picker-container',
       listOfHours: []
     };
 
@@ -59,13 +60,15 @@ export class TimePickerStyle extends React.Component<ITimePickerProps, ITimePick
 
   componentWillReceiveProps(newProps) {
 
-    if (!!newProps.error) {
+    if (newProps.error === true) {
       this.setState({
+        formBorderClassName: 'time-picker-container-error'
       });
     }
 
-    if (!!newProps.valid) {
+    if (newProps.error === false) {
       this.setState({
+        formBorderClassName: 'time-picker-container'
       });
     }
   }
@@ -82,7 +85,7 @@ export class TimePickerStyle extends React.Component<ITimePickerProps, ITimePick
         break
     }
 
-    this.setState({listOfHours: timeSlots})
+    this.setState({listOfHours: timeSlots}, () => this.props.onUpdateTime(this.props.day, this.state.listOfHours))
   }
 
   onDeleteTime = (index: number) => {
@@ -90,7 +93,7 @@ export class TimePickerStyle extends React.Component<ITimePickerProps, ITimePick
 
     timeSlots.splice(index, 1)
 
-    this.setState({listOfHours: timeSlots})
+    this.setState({listOfHours: timeSlots}, () => this.props.onUpdateTime(this.props.day, this.state.listOfHours))
   }
 
   onAddTime = () => {
@@ -100,19 +103,18 @@ export class TimePickerStyle extends React.Component<ITimePickerProps, ITimePick
     const defaultTimeInit = '8:00'
     const defaultTimeFinish = '14:00'
 
-    console.log(this.state.listOfHours)
-
     const timeSlots = this.state.listOfHours
 
     const horarioDefault = {
         diaSemana: this.props.day,
         horarioInicio: defaultTimeInit,
-        horarioFim: defaultTimeFinish
+        horarioFim: defaultTimeFinish,
+        tipo: this.props.time_type
     } as horario
 
     timeSlots.push(horarioDefault)
 
-    this.setState({listOfHours: timeSlots})
+    this.setState({listOfHours: timeSlots}, () => this.props.onUpdateTime(this.props.day, this.state.listOfHours))
   }
 
   mapTimeToSlots = (item: horario, index: number) => {
@@ -135,7 +137,7 @@ export class TimePickerStyle extends React.Component<ITimePickerProps, ITimePick
             theme='classic'
             time={item.horarioFim}
             timeConfig={{
-              from: this.props.startHour,
+              from: item.horarioInicio,
               to: this.props.endHour,
               step: this.props.step,
               unit: this.props.unit
@@ -151,7 +153,7 @@ export class TimePickerStyle extends React.Component<ITimePickerProps, ITimePick
 
   render() {
     return (
-      <div className="time-picker-container">
+      <div className={this.state.formBorderClassName}>
         <div className='time-picker-header'>
           <label className='time-picker-day-style'>{this.props.day}</label>
           <img onClick={this.onAddTime} className='img-plus-signal' src= {plus_signal}></img>

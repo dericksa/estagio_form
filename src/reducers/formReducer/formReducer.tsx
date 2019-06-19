@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { FAILURE, REQUEST, SUCCESS } from '../../reducers/action-type.util';
 import { HttpRequestStatus } from '../../models/HttpRequestStatus';
+import { ICadastroEstagio } from '../../models/cadastro-estagio';
 
 
 export const ACTION_TYPES = {
@@ -46,6 +47,11 @@ export default (state: FormState = initialState, action): FormState => {
 export const fetchId = (id?: number) => ({
         type: ACTION_TYPES.SAVE_FORM,
         payload: axios.get(`http://localhost:5000/${id}`)
+});
+
+export const registerForm = (form: ICadastroEstagio) => ({
+    type: ACTION_TYPES.SAVE_FORM,
+    payload: axios.post(`http://localhost:5000/formulario/cadastrar`, form)
 });
 
 export const fetchId2 = (id?: number) => {

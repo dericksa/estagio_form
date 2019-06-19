@@ -2,6 +2,7 @@ import React, { ChangeEvent } from 'react';
 import { translate } from 'react-jhipster';
 import classnames from 'classnames';
 import InputMask from 'react-input-mask';
+import '../InputField/input-field.css';
 import _ from 'lodash';
 
 export interface ISelectProps {
@@ -37,11 +38,11 @@ export class Select extends React.Component<ISelectProps, ISelectState> {
 
     if (!!newProps.error) {
       this.setState({
-        formBorderClassName: 'form-error'
+        formBorderClassName: 'form-field-error'
       });
     }
 
-    if (!!newProps.error) {
+    if (!!!newProps.error) {
       this.setState({
         formBorderClassName: 'form-field'
       });

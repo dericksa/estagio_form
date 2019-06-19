@@ -17,7 +17,7 @@ class ValidationUtils {
     }
 
     isValidNumber(n: number): boolean {
-        if(n == undefined || n.toString.length <= 0) {
+        if(n == undefined || n.toString(10).length <= 0) {
             return false
         }
         return true
@@ -29,7 +29,7 @@ class ValidationUtils {
       }
     
       isEmailValid(text) {
-        if (this.isValidString(text)) {
+        if (!this.isValidString(text)) {
           return false;
         }
     

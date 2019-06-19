@@ -17,7 +17,7 @@
     transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
 }
 
-.form-field-error {
+.form-field-error-top {
     display: block;
     width: 100%;
     height: 34px;

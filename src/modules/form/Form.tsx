@@ -4,7 +4,7 @@ import InputField from '../../components/InputField/InputField';
 import Select from '../../components/Select/select';
 import Header from './header/header'
 import GroupHeader from './groupheader/groupheader'
-import { dia_semana, tipo_estagio, ICadastroEstagio } from '../../models/cadastro-estagio';
+import { dia_semana, tipo_estagio, ICadastroEstagio, horario, tipo_horario } from '../../models/cadastro-estagio';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import moment from "moment";
@@ -17,9 +17,9 @@ import { connect } from 'react-redux';
 import { IRootState } from '../../reducers/';
 import { HttpRequestStatus } from '../../models/HttpRequestStatus';
 import {
-    fetchId,
+    registerForm,
     reset
-  } from '../../reducers/formReducer/formReducer';
+} from '../../reducers/formReducer/formReducer';
 import ValidationUtils from '../../utils/validationUtils'
 import { throwStatement } from '@babel/types';
 
@@ -31,6 +31,8 @@ export interface IFormState {
     newCadastro?: ICadastroEstagio,
     errors?: { [key: string]: boolean | undefined };
     valids?: { [key: string]: boolean | undefined };
+    schedulesInternship?: { [key: string]: horario[] | undefined };
+    schedulesClass?: { [key: string]: horario[] | undefined };
     estagioOptions?: string[];
     name?: string;
 }
@@ -57,7 +59,7 @@ export class Form extends React.Component<IFormProps, IFormState> {
                 telefoneSupervisor: undefined,
                 emailSupervisor: undefined,
                 emailRH: undefined,
-                horarioEstagio: undefined,
+                horarios: undefined,
                 dataInicioEstagio: undefined,
                 nomeOrientador: undefined,
                 telefoneOrientador: undefined,
@@ -68,22 +70,36 @@ export class Form extends React.Component<IFormProps, IFormState> {
             },
             errors: {},
             valids: {},
-            estagioOptions: [tipo_estagio.NOBG, tipo_estagio.OBG_1, tipo_estagio.OBG_2, tipo_estagio.OBG_1_2],
+            schedulesInternship: {
+                [dia_semana.SEGUNDA_FEIRA]: [],
+                [dia_semana.TERCA_FEIRA]: [],
+                [dia_semana.QUARTA_FEIRA]: [],
+                [dia_semana.QUINTA_FEIRA]: [],
+                [dia_semana.SEXTA_FEIRA]: []
+            },
+            schedulesClass: {
+                [dia_semana.SEGUNDA_FEIRA]: [],
+                [dia_semana.TERCA_FEIRA]: [],
+                [dia_semana.QUARTA_FEIRA]: [],
+                [dia_semana.QUINTA_FEIRA]: [],
+                [dia_semana.SEXTA_FEIRA]: []
+            },
+            estagioOptions: [tipo_estagio.NOBG, tipo_estagio.OBG_1, tipo_estagio.OBG_2, tipo_estagio.OBG_1_2, tipo_estagio.IC]
         };
     }
 
 
     componentWillReceiveProps(newProps) {
-        if(newProps.saveForm === HttpRequestStatus.SUCCESS){
+        if (newProps.saveForm === HttpRequestStatus.SUCCESS) {
             console.log("success")
         }
-        if(newProps.saveForm === HttpRequestStatus.ERROR){
+        if (newProps.saveForm === HttpRequestStatus.ERROR) {
             console.log("error")
         }
-        if(newProps.saveForm === HttpRequestStatus.ONGOING){
+        if (newProps.saveForm === HttpRequestStatus.ONGOING) {
             console.log("ongoing")
         }
-    
+
     }
 
     handleTextChanged = (text: string, propertyToChange: string, fieldKey?: string) => {
@@ -95,8 +111,78 @@ export class Form extends React.Component<IFormProps, IFormState> {
         return;
     };
 
+    onUpdateClassHours = (day: dia_semana, listOfHours?: horario[]) => {
+        this.setState(prevState => ({
+            schedulesClass: { ...prevState.schedulesClass, [day]: listOfHours }
+        }));
+    }
 
-    validateStudentInformation = (): boolean =>  {
+    onUpdateInternShipHours = (day: dia_semana, listOfHours?: horario[]) => {
+        this.setState(prevState => ({
+            schedulesInternship: { ...prevState.schedulesInternship, [day]: listOfHours }
+        }));
+    }
+
+    getDateForSchedule = (schedule: string): number => {
+        var event = new Date();
+        const parts = schedule.split(':')
+        event.setHours(parseInt(parts[0], 10));
+        event.setMinutes(parseInt(parts[1]), 10);
+        event.setSeconds(0);
+
+        return event.getTime()
+    }
+
+    doScheduleOverlay = (schedule1: string, schedule1_2: string, schedule2: string, schedule2_2: string): boolean => { 
+        const a1 = this.getDateForSchedule(schedule1)
+        const a2 = this.getDateForSchedule(schedule1_2)
+        const b1 = this.getDateForSchedule(schedule2)
+        const b2 = this.getDateForSchedule(schedule2_2)
+        
+        return (Math.max(a2,b2) - Math.min(a1,b1)) < (((a2-a1) + (b2-b1)) + 1800000) //180000 = 30 minutes in milliseconds
+    }
+
+    validateSchedules = (): boolean => { 
+        let scheduleOverlapping = false
+        const day_vector: dia_semana[] = [dia_semana.SEGUNDA_FEIRA, dia_semana.TERCA_FEIRA, dia_semana.QUARTA_FEIRA, dia_semana.QUINTA_FEIRA, dia_semana.SEXTA_FEIRA]
+
+        for(const day in day_vector) {
+            const classes: horario[] = this.state.schedulesClass[day_vector[day]]
+            const internship: horario[] = this.state.schedulesInternship[day_vector[day]]
+
+            if(classes !== undefined && internship !== undefined) {
+                
+                for(const index in classes) {
+                    for(const index_inter in internship) {
+                        scheduleOverlapping= this.doScheduleOverlay(classes[index].horarioInicio, classes[index].horarioFim, internship[index_inter].horarioInicio, internship[index_inter].horarioFim)
+                    
+
+                        this.setState(prevState => ({
+                            errors: {
+                                ...this.state.errors, [day_vector[day]]: scheduleOverlapping
+                            }
+                        }));
+                        
+                        if(scheduleOverlapping){
+                            return scheduleOverlapping
+                        }
+                    }
+                }
+            }
+
+            this.setState(prevState => ({
+                errors: {
+                    ...this.state.errors, [day_vector[day]]: scheduleOverlapping
+                }
+            }));
+            
+        }
+
+        return scheduleOverlapping
+    }
+
+
+    validateStudentInformation = (): boolean => {
         let result = true;
         let isNameError = false;
         let isRegisterError = false;
@@ -126,32 +212,33 @@ export class Form extends React.Component<IFormProps, IFormState> {
             isNameError = true;
         }
 
-        if(!ValidationUtils.isValidNumber(this.state.newCadastro.matricula)) {
+        if (!ValidationUtils.isValidNumber(this.state.newCadastro.matricula)) {
+            console.log(this.state.newCadastro.matricula)
             result = false;
             isRegisterError = true;
         }
 
-        if(!ValidationUtils.isValidPhoneNumber(this.state.newCadastro.celular)) {
+        if (!ValidationUtils.isValidPhoneNumber(this.state.newCadastro.celular)) {
             result = false;
             isCellPhoneError = true;
         }
 
-        if(!ValidationUtils.isValidPhoneNumber(this.state.newCadastro.telefone)) {
+        if (!ValidationUtils.isValidPhoneNumber(this.state.newCadastro.telefone)) {
             result = false;
             isPhoneError = true;
         }
 
-        if(!ValidationUtils.isEmailValid(this.state.newCadastro.email)) {
+        if (!ValidationUtils.isEmailValid(this.state.newCadastro.email)) {
             result = false;
             isEmailError = true;
         }
 
-        if(!ValidationUtils.isValidNumber(this.state.newCadastro.ano)) {
+        if (!ValidationUtils.isValidNumber(this.state.newCadastro.ano)) {
             result = false;
             isYearError = true;
         }
 
-        if(!ValidationUtils.isValidNumber(this.state.newCadastro.periodo)) {
+        if (!ValidationUtils.isValidNumber(this.state.newCadastro.periodo)) {
             result = false;
             isPeriodError = true;
         }
@@ -160,8 +247,8 @@ export class Form extends React.Component<IFormProps, IFormState> {
             result = false;
             isCompanyNameError = true;
         }
-        
-        if(this.state.newCadastro.tipoEstagio == undefined) {
+
+        if (this.state.newCadastro.tipoEstagio == undefined) {
             result = false;
             isTypeError = true;
         }
@@ -196,12 +283,12 @@ export class Form extends React.Component<IFormProps, IFormState> {
             isInternShipActivitiesValid = true;
         }
 
-        if(this.state.newCadastro.dataInicioEstagio == undefined) {
+        if (this.state.newCadastro.dataInicioEstagio == undefined) {
             result = false;
             isInitialDateError = true;
         }
 
-        if(this.state.newCadastro.dataTerminoEstagio == undefined) {
+        if (this.state.newCadastro.dataTerminoEstagio == undefined) {
             result = false;
             isEndDateError = true;
         }
@@ -216,7 +303,7 @@ export class Form extends React.Component<IFormProps, IFormState> {
             isAdvisorPhoneError = true;
         }
 
-        if(!ValidationUtils.isEmailValid(this.state.newCadastro.emailOrientador)) {
+        if (!ValidationUtils.isEmailValid(this.state.newCadastro.emailOrientador)) {
             result = false;
             isAdvisorEmailError = true;
         }
@@ -226,13 +313,15 @@ export class Form extends React.Component<IFormProps, IFormState> {
             isAdvisorRoleError = true;
         }
 
-    
+
         this.setState({
-            errors: { ...this.state.errors, ['nome']: isNameError, ['matricula']: isRegisterError, ['celular']: isCellPhoneError, ['telefone']: isPhoneError,
-        ['email']: isEmailError, ['ano']: isYearError, ['periodo']: isPeriodError, ['nomeEmpresa']: isCompanyNameError, ['tipoEstagio']: isTypeError, ['supervisorEmpresa']: isSupervisorNameError, ['cargoSupervisor']: isSupervisorRoleError,
-        ['telefoneSupervisor']: isSupervisorPhoneError, ['emailSupervisor']: isSupervisorEmailError, ['emailRH']: isHREmailError, ['atividadesEstagio']: isInternShipActivitiesValid,
-        ['dataInicioEstagio']: isInitialDateError, ['dataTerminoEstagio']: isEndDateError, ['nomeOrientador']: isAdvisorNameError, ['telefoneOrientador']: isAdvisorPhoneError, ['emailOrientador']: isAdvisorEmailError, 
-        ['cargoOrientador']: isAdvisorRoleError }
+            errors: {
+                ...this.state.errors, ['nome']: isNameError, ['matricula']: isRegisterError, ['celular']: isCellPhoneError, ['telefone']: isPhoneError,
+                ['email']: isEmailError, ['ano']: isYearError, ['periodo']: isPeriodError, ['nomeEmpresa']: isCompanyNameError, ['tipoEstagio']: isTypeError, ['supervisorEmpresa']: isSupervisorNameError, ['cargoSupervisor']: isSupervisorRoleError,
+                ['telefoneSupervisor']: isSupervisorPhoneError, ['emailSupervisor']: isSupervisorEmailError, ['emailRH']: isHREmailError, ['atividadesEstagio']: isInternShipActivitiesValid,
+                ['dataInicioEstagio']: isInitialDateError, ['dataTerminoEstagio']: isEndDateError, ['nomeOrientador']: isAdvisorNameError, ['telefoneOrientador']: isAdvisorPhoneError, ['emailOrientador']: isAdvisorEmailError,
+                ['cargoOrientador']: isAdvisorRoleError
+            }
         });
 
         return result
@@ -242,11 +331,51 @@ export class Form extends React.Component<IFormProps, IFormState> {
         return this.validateStudentInformation()
     }
 
-    handleSave = () => {
-        this.props.fetchId(1)
-        if (!this.validateForm()) {
-            return;
+    getScheduleOfDay = (day: dia_semana): horario[] => {
+        const classDay = this.state.schedulesClass[day]
+        const internshipDay = this.state.schedulesInternship[day]
+
+        if(classDay && internshipDay === undefined) {
+            return
         }
+        else if (classDay === undefined) {
+            return internshipDay
+        }
+        else if (internshipDay == undefined) {
+            return classDay
+        }
+        else {
+            return internshipDay.concat(classDay)
+        }
+    }
+
+    handleSave = () => {
+
+        if(!this.validateForm()) {
+            return
+        }
+
+        if(this.validateSchedules()) {
+            return
+        }
+        
+        var schedules = []
+        schedules = schedules.concat(this.getScheduleOfDay(dia_semana.SEGUNDA_FEIRA))
+        schedules = schedules.concat (this.getScheduleOfDay(dia_semana.TERCA_FEIRA))
+        schedules = schedules.concat (this.getScheduleOfDay(dia_semana.QUARTA_FEIRA))
+        schedules = schedules.concat (this.getScheduleOfDay(dia_semana.QUINTA_FEIRA))
+        schedules = schedules.concat (this.getScheduleOfDay(dia_semana.SEXTA_FEIRA))
+        schedules = schedules.concat (this.getScheduleOfDay(dia_semana.SABADO))
+
+        schedules = schedules.filter(function (el) {
+            return el != null;
+          });
+
+        this.setState(prevState => ({ newCadastro: { ...prevState.newCadastro, horarios: schedules } }), () => this.sendInfo());
+    }
+
+    sendInfo = () => { 
+        this.props.registerForm(this.state.newCadastro)
     }
 
     handleInput = (e) => {
@@ -395,44 +524,56 @@ export class Form extends React.Component<IFormProps, IFormState> {
                             <div className={'form-time-divisor'}>
                                 <TimePickerStyle
                                     day={dia_semana.SEGUNDA_FEIRA}
+                                    time_type={tipo_horario.AULA}
+                                    error = {this.state.errors[dia_semana.SEGUNDA_FEIRA]}
                                     maxSlots={17}
                                     startHour='7:00'
                                     endHour='23:00'
                                     step={15}
                                     unit='minute'
+                                    onUpdateTime={this.onUpdateClassHours}
                                 />
                             </div>
 
                             <div className={'form-time-divisor'}>
                                 <TimePickerStyle
                                     day={dia_semana.TERCA_FEIRA}
+                                    time_type={tipo_horario.AULA}
+                                    error = {this.state.errors[dia_semana.TERCA_FEIRA]}
                                     maxSlots={17}
                                     startHour='6:00'
                                     endHour='23:00'
                                     step={15}
                                     unit='minute'
+                                    onUpdateTime={this.onUpdateClassHours}
                                 />
                             </div>
 
                             <div className={'form-time-divisor'}>
                                 <TimePickerStyle
                                     day={dia_semana.QUARTA_FEIRA}
+                                    time_type={tipo_horario.AULA}
+                                    error = {this.state.errors[dia_semana.QUARTA_FEIRA]}
                                     maxSlots={17}
                                     startHour='6:00'
                                     endHour='23:00'
                                     step={15}
                                     unit='minute'
+                                    onUpdateTime={this.onUpdateClassHours}
                                 />
                             </div>
 
                             <div className={'form-time-divisor'}>
                                 <TimePickerStyle
                                     day={dia_semana.QUINTA_FEIRA}
+                                    time_type={tipo_horario.AULA}
+                                    error = {this.state.errors[dia_semana.QUINTA_FEIRA]}
                                     maxSlots={17}
                                     startHour='6:00'
                                     endHour='23:00'
                                     step={15}
                                     unit='minute'
+                                    onUpdateTime={this.onUpdateClassHours}
                                 />
                             </div>
 
@@ -440,26 +581,31 @@ export class Form extends React.Component<IFormProps, IFormState> {
                             <div className={'form-time-divisor'}>
                                 <TimePickerStyle
                                     day={dia_semana.SEXTA_FEIRA}
+                                    time_type={tipo_horario.AULA}
+                                    error = {this.state.errors[dia_semana.SEXTA_FEIRA]}
                                     maxSlots={17}
                                     startHour='6:00'
                                     endHour='23:00'
                                     step={15}
                                     unit='minute'
+                                    onUpdateTime={this.onUpdateClassHours}
                                 />
                             </div>
 
                             <div className={'form-time-divisor'}>
                                 <TimePickerStyle
                                     day={dia_semana.SABADO}
+                                    time_type={tipo_horario.AULA}
                                     maxSlots={17}
                                     startHour='6:00'
                                     endHour='23:00'
                                     step={15}
                                     unit='minute'
+                                    onUpdateTime={this.onUpdateClassHours}
                                 />
                             </div>
 
-                            
+
                         </div>
 
                         <div className={'form-group-container'}>
@@ -559,8 +705,8 @@ export class Form extends React.Component<IFormProps, IFormState> {
                             <div className={'form-input-divisor'}>
                                 <div className="form-group">
                                     <label> {"Data de início do Estágio"} </label>
-                                    
-                                    {this.state.errors['dataInicioEstagio'] ? <label className={'label-error-date'}> {"Preencher data de início"} </label> : ''}  
+
+                                    {this.state.errors['dataInicioEstagio'] ? <label className={'label-error-date'}> {"Preencher data de início"} </label> : ''}
                                     <DatePicker
                                         dateFormat="dd/MM/yyyy"
                                         selected={this.state.newCadastro.dataInicioEstagio}
@@ -571,7 +717,7 @@ export class Form extends React.Component<IFormProps, IFormState> {
                             <div className={'form-input-divisor'}>
                                 <div className="form-group">
                                     <label> {"Data de término do Estágio"} </label>
-                                    {this.state.errors['dataTerminoEstagio'] ? <label className={'label-error-date'}> {"Preencher data de término"} </label> : ''} 
+                                    {this.state.errors['dataTerminoEstagio'] ? <label className={'label-error-date'}> {"Preencher data de término"} </label> : ''}
                                     <DatePicker
                                         dateFormat="dd/MM/yyyy"
                                         selected={this.state.newCadastro.dataTerminoEstagio}
@@ -594,9 +740,6 @@ export class Form extends React.Component<IFormProps, IFormState> {
                                     isTextArea
                                 />
                             </div>
-                            
-
-
                         </div>
 
                         <div className={'form-group-container'}>
@@ -607,44 +750,56 @@ export class Form extends React.Component<IFormProps, IFormState> {
                             <div className={'form-time-divisor'}>
                                 <TimePickerStyle
                                     day={dia_semana.SEGUNDA_FEIRA}
+                                    time_type={tipo_horario.ESTAGIO}
+                                    error = {this.state.errors[dia_semana.SEGUNDA_FEIRA]}
                                     maxSlots={2}
                                     startHour='6:00'
                                     endHour='23:00'
                                     step={10}
                                     unit='minute'
+                                    onUpdateTime={this.onUpdateInternShipHours}
                                 />
                             </div>
 
                             <div className={'form-time-divisor'}>
                                 <TimePickerStyle
                                     day={dia_semana.TERCA_FEIRA}
+                                    time_type={tipo_horario.ESTAGIO}
+                                    error = {this.state.errors[dia_semana.TERCA_FEIRA]}
                                     maxSlots={2}
                                     startHour='6:00'
                                     endHour='23:00'
                                     step={10}
                                     unit='minute'
+                                    onUpdateTime={this.onUpdateInternShipHours}
                                 />
                             </div>
 
                             <div className={'form-time-divisor'}>
                                 <TimePickerStyle
                                     day={dia_semana.QUARTA_FEIRA}
+                                    time_type={tipo_horario.ESTAGIO}
+                                    error = {this.state.errors[dia_semana.QUARTA_FEIRA]}
                                     maxSlots={2}
                                     startHour='6:00'
                                     endHour='23:00'
                                     step={10}
                                     unit='minute'
+                                    onUpdateTime={this.onUpdateInternShipHours}
                                 />
                             </div>
 
                             <div className={'form-time-divisor'}>
                                 <TimePickerStyle
                                     day={dia_semana.QUINTA_FEIRA}
+                                    time_type={tipo_horario.ESTAGIO}
+                                    error = {this.state.errors[dia_semana.QUINTA_FEIRA]}
                                     maxSlots={2}
                                     startHour='6:00'
                                     endHour='23:00'
                                     step={10}
                                     unit='minute'
+                                    onUpdateTime={this.onUpdateInternShipHours}
                                 />
                             </div>
 
@@ -652,15 +807,18 @@ export class Form extends React.Component<IFormProps, IFormState> {
                             <div className={'form-time-divisor'}>
                                 <TimePickerStyle
                                     day={dia_semana.SEXTA_FEIRA}
+                                    time_type={tipo_horario.ESTAGIO}
+                                    error = {this.state.errors[dia_semana.SEXTA_FEIRA]}
                                     maxSlots={2}
                                     startHour='6:00'
                                     endHour='23:00'
                                     step={10}
                                     unit='minute'
+                                    onUpdateTime={this.onUpdateInternShipHours}
                                 />
                             </div>
 
-                            
+
                         </div>
 
                         <div className={'form-group-container'}>
@@ -721,22 +879,22 @@ export class Form extends React.Component<IFormProps, IFormState> {
                         </div>
 
                         <div className={'form-input-divisor'}>
-                                <InputField
-                                    title={"Observações"}
-                                    onChange={event => this.handleTextChanged(event.target.value, 'observacoes')}
-                                    error={this.state.errors['observacoes']}
-                                    valid={this.state.valids['observacoes']}
-                                    inputClassName={'form-input'}
-                                    value={this.state.newCadastro.atividadesEstagio ? this.state.newCadastro.atividadesEstagio : ''}
-                                    placeholder={'Observações'}
-                                    hasInfo
-                                    info={'Fato relevante a ser mencionado sobre o seu estágio caso necessário.'}
-                                    isTextArea
-                                />
-                            </div>
+                            <InputField
+                                title={"Observações"}
+                                onChange={event => this.handleTextChanged(event.target.value, 'observacoes')}
+                                error={this.state.errors['observacoes']}
+                                valid={this.state.valids['observacoes']}
+                                inputClassName={'form-input'}
+                                value={this.state.newCadastro.observacoes ? this.state.newCadastro.observacoes : ''}
+                                placeholder={'Observações'}
+                                hasInfo
+                                info={'Fato relevante a ser mencionado sobre o seu estágio caso necessário.'}
+                                isTextArea
+                            />
+                        </div>
 
                         <div className='form-send-button'>
-                        <MDBBtn rounded outline color="danger" onClick={this.handleSave}>Enviar</MDBBtn>
+                            <MDBBtn rounded outline color="danger" onClick={this.handleSave}>Enviar</MDBBtn>
                         </div>
 
                     </div>
@@ -746,12 +904,12 @@ export class Form extends React.Component<IFormProps, IFormState> {
     }
 }
 
-const mapDispatchToProps = {fetchId, reset}
+const mapDispatchToProps = { registerForm, reset }
 
 const mapStateToProps = (storeState: IRootState) => ({
     saveForm: storeState.form.saveForm,
     data: storeState.form.data
-  });
+});
 
 type StateProps = ReturnType<typeof mapStateToProps>;
 type DispatchProps = typeof mapDispatchToProps;
@@ -759,4 +917,4 @@ type DispatchProps = typeof mapDispatchToProps;
 export default connect(
     mapStateToProps,
     mapDispatchToProps
-  )(Form);
+)(Form);
