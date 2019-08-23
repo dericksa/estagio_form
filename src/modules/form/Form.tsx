@@ -156,10 +156,9 @@ export class Form extends React.Component<IFormProps, IFormState> {
                     for(const index_inter in internship) {
                         scheduleOverlapping= this.doScheduleOverlay(classes[index].horarioInicio, classes[index].horarioFim, internship[index_inter].horarioInicio, internship[index_inter].horarioFim)
                     
-
                         this.setState(prevState => ({
                             errors: {
-                                ...this.state.errors, [day_vector[day]]: scheduleOverlapping
+                                ...prevState.errors, [day_vector[day]]: scheduleOverlapping
                             }
                         }));
                         
@@ -172,7 +171,7 @@ export class Form extends React.Component<IFormProps, IFormState> {
 
             this.setState(prevState => ({
                 errors: {
-                    ...this.state.errors, [day_vector[day]]: scheduleOverlapping
+                    ...prevState.errors, [day_vector[day]]: scheduleOverlapping
                 }
             }));
             
@@ -328,7 +327,11 @@ export class Form extends React.Component<IFormProps, IFormState> {
     }
 
     validateForm = (): boolean => {
-        return this.validateStudentInformation()
+        
+        const studentInfo = this.validateStudentInformation()
+        const scheduleInfo = this.validateSchedules()
+
+        return studentInfo && !scheduleInfo
     }
 
     getScheduleOfDay = (day: dia_semana): horario[] => {
@@ -352,10 +355,6 @@ export class Form extends React.Component<IFormProps, IFormState> {
     handleSave = () => {
 
         if(!this.validateForm()) {
-            return
-        }
-
-        if(this.validateSchedules()) {
             return
         }
         
